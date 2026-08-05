@@ -1,0 +1,719 @@
+basePath: /api
+definitions:
+  dto.CartItemRequest:
+    properties:
+      kuantitas:
+        maximum: 10
+        minimum: 1
+        type: integer
+      product_id:
+        type: integer
+    required:
+    - kuantitas
+    - product_id
+    type: object
+  dto.CartItemUpdateRequest:
+    properties:
+      kuantitas:
+        maximum: 10
+        minimum: 1
+        type: integer
+    required:
+    - kuantitas
+    type: object
+  dto.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  dto.LoginResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/dto.UserInfo'
+    type: object
+  dto.OrderRequest:
+    properties:
+      alamat:
+        type: string
+      nama_penyewa:
+        type: string
+      nomor_telepon:
+        type: string
+    required:
+    - alamat
+    - nama_penyewa
+    - nomor_telepon
+    type: object
+  dto.ProductRequest:
+    properties:
+      deskripsi:
+        type: string
+      fasilitas:
+        type: string
+      gambar:
+        type: string
+      harga_per_bulan:
+        type: number
+      kategori:
+        type: string
+      nama_kamar:
+        type: string
+      stok:
+        minimum: 0
+        type: integer
+    required:
+    - harga_per_bulan
+    - nama_kamar
+    type: object
+  dto.UpdateOrderStatusRequest:
+    properties:
+      status:
+        type: string
+    required:
+    - status
+    type: object
+  dto.UserInfo:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      nama:
+        type: string
+      role:
+        type: string
+    type: object
+  helper.Response:
+    properties:
+      data: {}
+      message:
+        type: string
+      status:
+        type: boolean
+    type: object
+  models.Cart:
+    properties:
+      cart_items:
+        items:
+          $ref: '#/definitions/models.CartItem'
+        type: array
+      created_at:
+        type: string
+      id:
+        type: integer
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  models.CartItem:
+    properties:
+      cart_id:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: integer
+      kuantitas:
+        type: integer
+      product:
+        $ref: '#/definitions/models.Product'
+      product_id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  models.Order:
+    properties:
+      alamat:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      nama_penyewa:
+        type: string
+      nomor_telepon:
+        type: string
+      order_items:
+        items:
+          $ref: '#/definitions/models.OrderItem'
+        type: array
+      reservation_number:
+        type: string
+      status:
+        description: DRAFT, CONFIRMED, COMPLETED, CANCELLED
+        type: string
+      total_harga:
+        type: number
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  models.OrderItem:
+    properties:
+      created_at:
+        type: string
+      harga_per_bulan:
+        type: number
+      id:
+        type: integer
+      kuantitas:
+        type: integer
+      order_id:
+        type: integer
+      product:
+        $ref: '#/definitions/models.Product'
+      product_id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  models.Product:
+    properties:
+      created_at:
+        type: string
+      deskripsi:
+        type: string
+      fasilitas:
+        type: string
+      gambar:
+        type: string
+      harga_per_bulan:
+        type: number
+      id:
+        type: integer
+      kategori:
+        type: string
+      nama_kamar:
+        type: string
+      stok:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: KosHub Boarding Room Reservation System API
+  title: KosHub API
+  version: "1.0"
+paths:
+  /cart:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve the current logged-in user's cart and its items.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User cart details
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Cart'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/helper.Response'
+      security:
+      - BearerAuth: []
+      summary: Get User Cart
+      tags:
+      - cart
+    post:
+      consumes:
+      - application/json
+      description: Add a room to the user's cart.
+      parameters:
+      - description: Cart item data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CartItemRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Item added successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CartItem'
+              type: object
+        "400":
+          description: Invalid quantity or exceeds stock limit
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Response'
+      security:
+      - BearerAuth: []
+      summary: Add Item to Cart
+      tags:
+      - cart
+  /cart/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove an item from the user's cart by ID.
+      parameters:
+      - description: Cart Item ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Item removed from cart
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "400":
+          description: Invalid item ID or database error
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete Cart Item
+      tags:
+      - cart
+    put:
+      consumes:
+      - application/json
+      description: Update the quantity of a specific room in the user's cart.
+      parameters:
+      - description: Cart Item ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated quantity data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CartItemUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Cart item updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CartItem'
+              type: object
+        "400":
+          description: Invalid item ID, quantity parameters or stock constraints
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Response'
+      security:
+      - BearerAuth: []
+      summary: Update Cart Item Quantity
+      tags:
+      - cart
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user with email and password and returns a JWT
+        token.
+      parameters:
+      - description: Login Credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful login
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.LoginResponse'
+              type: object
+        "400":
+          description: Invalid input format
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "401":
+          description: Invalid email or password
+          schema:
+            $ref: '#/definitions/helper.Response'
+      summary: User Login
+      tags:
+      - authentication
+  /orders:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all reservations (admin) or personal reservations (user).
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of reservations
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Order'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/helper.Response'
+      security:
+      - BearerAuth: []
+      summary: List Reservations
+      tags:
+      - orders
+    post:
+      consumes:
+      - application/json
+      description: Processes checkout and creates a new boarding room reservation.
+      parameters:
+      - description: Checkout tenant details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.OrderRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Reservation created successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Order'
+              type: object
+        "400":
+          description: Empty cart or invalid tenant details
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Response'
+      security:
+      - BearerAuth: []
+      summary: Reserve/Checkout Cart Items
+      tags:
+      - orders
+  /orders/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve details of a specific reservation.
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Reservation details
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Order'
+              type: object
+        "400":
+          description: Invalid reservation ID
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "404":
+          description: Reservation not found or access denied
+          schema:
+            $ref: '#/definitions/helper.Response'
+      security:
+      - BearerAuth: []
+      summary: Get Reservation Detail
+      tags:
+      - orders
+  /orders/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Update the status of a reservation adhering to allowed state transition
+        flows.
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: New status value
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateOrderStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Reservation status updated
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Order'
+              type: object
+        "400":
+          description: Invalid ID, invalid status value, or rejected state transition
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Response'
+      security:
+      - BearerAuth: []
+      summary: Update Reservation Status
+      tags:
+      - orders
+  /products:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all boarding rooms available.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of rooms
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/models.Product'
+                  type: array
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/helper.Response'
+      summary: List Boarding Rooms
+      tags:
+      - products
+    post:
+      consumes:
+      - application/json
+      description: Add a new boarding room (Admin only).
+      parameters:
+      - description: Room data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ProductRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Room created
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Product'
+              type: object
+        "400":
+          description: Invalid request body or validation failure
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "403":
+          description: Forbidden (Admin only)
+          schema:
+            $ref: '#/definitions/helper.Response'
+      security:
+      - BearerAuth: []
+      summary: Create Boarding Room
+      tags:
+      - products
+  /products/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a boarding room by ID (Admin only).
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Room deleted
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "400":
+          description: Invalid ID or database error
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "403":
+          description: Forbidden (Admin only)
+          schema:
+            $ref: '#/definitions/helper.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete Boarding Room
+      tags:
+      - products
+    get:
+      consumes:
+      - application/json
+      description: Retrieve details of a specific boarding room by ID.
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Room details
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Product'
+              type: object
+        "400":
+          description: Invalid ID parameter
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "404":
+          description: Room not found
+          schema:
+            $ref: '#/definitions/helper.Response'
+      summary: Get Boarding Room Detail
+      tags:
+      - products
+    put:
+      consumes:
+      - application/json
+      description: Update existing boarding room details (Admin only).
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated room data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ProductRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Room updated
+          schema:
+            allOf:
+            - $ref: '#/definitions/helper.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Product'
+              type: object
+        "400":
+          description: Invalid ID or update parameters
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helper.Response'
+        "403":
+          description: Forbidden (Admin only)
+          schema:
+            $ref: '#/definitions/helper.Response'
+      security:
+      - BearerAuth: []
+      summary: Update Boarding Room
+      tags:
+      - products
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -1,0 +1,187 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Space+Mono&display=swap');
+
+/* ── Bugatti Design Tokens ── */
+:root {
+  --canvas:           #000000;
+  --surface-soft:     #0d0d0d;
+  --surface-card:     #141414;
+  --surface-elevated: #1f1f1f;
+  --hairline:         #262626;
+  --hairline-strong:  #3a3a3a;
+  --ink:              #ffffff;
+  --body-color:       #cccccc;
+  --body-strong:      #e6e6e6;
+  --muted:            #999999;
+  --muted-soft:       #666666;
+  --link:             #c3d9f3;
+  --success:          #5fa657;
+  --warning:          #d4a017;
+  --font-display: 'Cormorant Garamond', serif;
+  --font-body:    'Crimson Text', Georgia, serif;
+  --font-mono:    'Space Mono', ui-monospace, monospace;
+}
+
+/* ── Remap Tailwind palette → Bugatti dark ── */
+@theme {
+  /* slate → near-black surfaces & dark text */
+  --color-slate-50:  #0d0d0d;
+  --color-slate-100: #1f1f1f;
+  --color-slate-200: #262626;
+  --color-slate-300: #3a3a3a;
+  --color-slate-400: #666666;
+  --color-slate-500: #999999;
+  --color-slate-600: #cccccc;
+  --color-slate-700: #e6e6e6;
+  --color-slate-800: #f2f2f2;
+  --color-slate-900: #ffffff;
+  --color-slate-950: #000000;
+
+  /* violet → muted (spinner, icon, focus stay visible) */
+  --color-violet-50:  #0d0d0d;
+  --color-violet-100: #1f1f1f;
+  --color-violet-400: #cccccc;
+  --color-violet-500: #cccccc;
+  --color-violet-600: #999999;
+  --color-violet-700: #cccccc;
+
+  /* indigo → dark (collapses hero gradient to near-black) */
+  --color-indigo-50:  #0d0d0d;
+  --color-indigo-100: #1f1f1f;
+  --color-indigo-300: #cccccc;
+  --color-indigo-400: #e6e6e6;
+  --color-indigo-500: #cccccc;
+  --color-indigo-600: #999999;
+  --color-indigo-700: #cccccc;
+  --color-indigo-900: #000000;
+  --color-indigo-950: #000000;
+
+  /* amber stays for warnings */
+  --color-amber-50:  #1a1400;
+  --color-amber-100: #1f1800;
+  --color-amber-600: #d4a017;
+
+  /* green stays for success */
+  --color-green-600: #5fa657;
+
+  /* red stays readable on dark */
+  --color-red-50:  #1a0808;
+  --color-red-200: #3a1212;
+  --color-red-300: #6b1f1f;
+  --color-red-500: #e04060;
+  --color-red-600: #c83050;
+  --color-red-700: #a02040;
+}
+
+/* ── Base ── */
+@layer base {
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background-color: var(--canvas);
+    color: var(--body-color);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink);
+    line-height: 1.15;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  ::selection { background: var(--hairline-strong); color: var(--ink); }
+}
+
+/* ── bg-white → surface-card (can't remap without breaking text-white) ── */
+.bg-white { background-color: var(--surface-card) !important; }
+.bg-white\/85, .bg-white\/90 { background-color: rgba(20,20,20,0.92) !important; }
+
+/* ── Kill all shadows ── */
+[class*="shadow"] { box-shadow: none !important; }
+
+/* ── Collapse gradients → canvas black ── */
+.bg-gradient-to-br,
+.bg-gradient-to-r,
+.bg-gradient-to-l,
+.bg-gradient-to-t,
+.bg-gradient-to-b { background-image: none !important; background-color: var(--canvas) !important; }
+
+/* ── Fix gradient clip-text → plain white ── */
+.bg-clip-text.text-transparent,
+[class*="bg-clip-text"] { -webkit-text-fill-color: var(--ink) !important; color: var(--ink) !important; }
+.text-transparent { color: var(--ink) !important; -webkit-text-fill-color: var(--ink) !important; }
+
+/* ── Rounding: cards → sharp, buttons → pill ── */
+.rounded-sm, .rounded,
+.rounded-md, .rounded-lg,
+.rounded-xl, .rounded-2xl,
+.rounded-3xl { border-radius: 0 !important; }
+
+/* ── Buttons: transparent outline pill ── */
+[class~="bg-violet-600"],
+[class~="bg-violet-700"],
+[class~="bg-indigo-600"],
+[class~="bg-indigo-700"] {
+  background-color: transparent !important;
+  color: var(--ink) !important;
+  border: 1px solid var(--hairline-strong) !important;
+  border-radius: 9999px !important;
+  font-family: var(--font-mono) !important;
+  font-size: 11px !important;
+  letter-spacing: 0.18em !important;
+  text-transform: uppercase !important;
+  transition: border-color 0.2s !important;
+}
+[class~="bg-violet-600"]:hover,
+[class~="bg-violet-700"]:hover,
+[class~="bg-indigo-600"]:hover,
+[class~="bg-indigo-700"]:hover {
+  background-color: transparent !important;
+  border-color: var(--ink) !important;
+}
+
+/* ── Inputs: bottom-border only ── */
+input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]),
+select,
+textarea {
+  background-color: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid var(--hairline-strong) !important;
+  border-radius: 0 !important;
+  color: var(--ink) !important;
+  font-family: var(--font-body) !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border-bottom-color: var(--ink) !important;
+  --tw-ring-shadow: none !important;
+}
+input::placeholder { color: var(--muted) !important; }
+select option { background: var(--surface-card); color: var(--ink); }
+
+/* ── Section dividers ── */
+[class*="border-slate"] { border-color: var(--hairline) !important; }
+
+/* ── Category / status badges on photos stay readable ── */
+.backdrop-blur-sm { backdrop-filter: blur(8px); }
+
+/* ── Skeleton pulse ── */
+.animate-pulse { opacity: 0.25; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--canvas); }
+::-webkit-scrollbar-thumb { background: var(--hairline-strong); }
+

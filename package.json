@@ -1,0 +1,15 @@
+{
+  "name": "uas-advanced-software",
+  "version": "1.0.0",
+  "description": "Sistem Reservasi Kamar Kos Online (**KosHub**) dibangun untuk mempermudah pencarian, pemesanan, dan pengelolaan kamar kos secara real-time. Aplikasi ini memenuhi standar kualitas pengujian perangkat lunak dengan arsitektur bersih di backend dan antarmuka premium di frontend.",
+  "main": "cypress.config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "cypress": "^15.18.0"
+  }
+}
